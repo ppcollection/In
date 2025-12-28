@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PP Collection | Winter Edition 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #fffafb; scroll-behavior: smooth; overflow-x: hidden; }
+        .brand-font { font-family: 'Playfair Display', serif; }
+        
+        /* LOGO DESIGN */
+        .logo-wrapper { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.3s ease; }
+        .pp-box { 
+            background: #be185d; color: white; font-family: 'Montserrat', sans-serif;
+            padding: 2px 10px; border-radius: 4px; font-size: 1.5rem; font-weight: 800;
+            line-height: 1; transform: skewX(-10deg); box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+        .collection-text {
+            font-family: 'Playfair Display', serif; font-size: 1.1rem; text-transform: uppercase;
+            letter-spacing: 4px; color: #1f2937; font-weight: 700; border-bottom: 2px solid #be185d;
+        }
+
+        /* BANNER ANIMATION */
+        .banner-container { height: 45px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+        .banner-text { 
+            position: absolute; width: 100%; text-align: center; 
+            transition: all 0.7s ease-in-out; opacity: 0; transform: translateY(20px);
+            display: flex; align-items: center; justify-content: center; left: 0;
+        }
+        .banner-text.active { opacity: 1; transform: translateY(0); }
+
+        /* CART & POPUPS */
+        .cart-full-window { display: none; position: fixed; inset: 0; background: white; z-index: 1000; flex-direction: column; overflow-y: auto; }
+        .cart-active { display: flex; }
+        .popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .popup-content { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; }
+        .success-overlay { display: none; position: fixed; inset: 0; background: white; z-index: 3000; overflow-y: auto; }
+        .image-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1500; align-items: center; justify-content: center; padding: 15px; }
+
+        /* TRACKING SYSTEM */
+        .track-step { position: relative; padding-left: 35px; margin-bottom: 25px; }
+        .track-step::before { content: ''; position: absolute; left: 0; top: 0; width: 14px; height: 14px; border-radius: 50%; background: #be185d; border: 3px solid #fbcfe8; }
+        .track-step::after { content: ''; position: absolute; left: 6px; top: 14px; width: 2px; height: 30px; background: #fbcfe8; }
+        .track-step:last-child::after { display: none; }
+        
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #be185d; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .product-img-container { height: 230px; border-radius: 1.5rem; overflow: hidden; background: #f3f3f3; cursor: zoom-in; position: relative; }
+        @media (min-width: 768px) { .product-img-container { height: 400px; } }
+
+        /* WHATSAPP BUTTON (UPDATED NUMBER) */
+        .whatsapp-btn {
+            position: fixed; bottom: 20px; right: 15px; background-color: #25d366; color: white;
+            padding: 10px 18px; border-radius: 50px; border: 2px solid white; display: flex;
+            align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100; font-weight: 700; font-size: 12px;
+        }
+
+        /* BADGE STYLES */
+        .badge-sale { position: absolute; bottom: 12px; left: 12px; background: #ef4444; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; z-index: 10; }
+        .badge-best { position: absolute; bottom: 12px; left: 12px; background: #f59e0b; color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; z-index: 10; border: 1px solid rgba(255,255,255,0.3); }
+
+        /* SECURE BADGE STYLE */
+        .secure-badge { display: inline-flex; align-items: center; gap: 5px; background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 50px; font-size: 10px; font-weight: 700; border: 1px solid #bcf0da; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- UPDATED WHATSAPP LINK -->
+    <a href="https://wa.me/918398051562" target="_blank" class="whatsapp-btn">SUPPORT</a>
+
+    <!-- IMAGE MODAL -->
+    <div id="imgModal" class="image-modal" onclick="closeImage()">
+        <span class="absolute top-5 right-5 text-white text-4xl">&times;</span>
+        <img id="modalImg" src="" class="max-h-[90vh] max-w-full rounded-lg shadow-2xl">
+    </div>
+
+    <!-- POPUP -->
+    <div id="customPopup" class="popup-overlay">
+        <div class="popup-content">
+            <div id="popupIcon" class="text-4xl mb-4">🔔</div>
+            <h3 id="popupTitle" class="font-bold text-xl mb-2 text-gray-800">Notification</h3>
+            <p id="popupMsg" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+            <button onclick="closePopup()" class="w-full bg-pink-600 text-white py-3 rounded-xl font-bold uppercase text-xs tracking-widest">Got it</button>
+        </div>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div id="successScreen" class="success-overlay p-6">
+        <div class="max-w-md mx-auto pt-8 text-center">
+            <div class="logo-wrapper justify-center mb-8">
+                <span class="pp-box">PP</span>
+                <span class="collection-text">Collection</span>
+            </div>
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 class="brand-font text-3xl mb-1 text-pink-700">Order Placed!</h2>
+            
+            <div class="bg-gray-50 rounded-3xl p-6 text-left border border-gray-100 mb-8 mt-6">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tracking ID</span>
+                    <span id="resTrackId" class="text-pink-600 font-mono font-bold text-lg"></span>
+                </div>
+                <div class="space-y-1">
+                    <div class="track-step"><p class="text-xs font-bold text-gray-800">Order Successfully Placed</p></div>
+                    <div class="track-step"><p class="text-xs font-bold text-gray-300">Order Processing</p></div>
+                    <div class="track-step"><p class="text-xs font-bold text-gray-300">Order Dispatched</p></div>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs">Shop More</button>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md z-50 border-b border-pink-100 px-4">
+        <div class="container mx-auto py-4 flex justify-between items-center">
+            <div class="logo-wrapper" onclick="location.reload()">
+                <span class="pp-box">PP</span>
+                <span class="collection-text">Collection</span>
+            </div>
+            <button onclick="toggleCart(true)" class="relative p-2 bg-pink-50 rounded-full text-pink-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- BANNERS -->
+    <div class="fixed top-[65px] md:top-[72px] w-full bg-pink-700 text-white z-40 shadow-md banner-container">
+        <div id="banner1" class="banner-text active font-bold text-[10px] md:text-xs uppercase tracking-[0.15em]">❄️ Buy 2+ Suits @ ₹500 Each Only! ❄️</div>
+        <div id="banner2" class="banner-text font-bold text-[10px] md:text-xs uppercase tracking-[0.15em]">🎁 EXTRA 10% DISCOUNT ON 3 OR MORE ITEMS! 🎁</div>
+        <div id="banner3" class="banner-text font-bold text-[10px] md:text-xs uppercase tracking-[0.15em]">⚠️ CASH ON DELIVERY NOT AVAILABLE ⚠️</div>
+    </div>
+
+    <header class="mt-40 mb-6 text-center px-4">
+        <h2 class="brand-font text-3xl text-gray-900 italic">Winter Premium Edition</h2>
+        <div class="h-1 w-16 bg-pink-600 mx-auto rounded-full mt-2"></div>
+    </header>
+
+    <!-- PRODUCT GRID -->
+    <div class="container mx-auto px-4 mb-10">
+        <div class="grid grid-cols-2 gap-3 md:gap-8 max-w-5xl mx-auto" id="product-grid"></div>
+        <div class="flex justify-center items-center gap-2 mt-12 mb-20" id="pagination"></div>
+    </div>
+
+    <!-- COPYRIGHT FOOTER -->
+    <footer class="bg-[#fffafb] border-t border-pink-100 py-10 text-center px-6">
+        <div class="logo-wrapper justify-center mb-4">
+            <span class="pp-box">PP</span>
+            <span class="collection-text">Collection</span>
+        </div>
+        <p class="text-[11px] text-gray-400 uppercase tracking-widest font-semibold">&copy; 2025 PP Collection. All Rights Reserved.</p>
+    </footer>
+
+    <!-- CART WINDOW -->
+    <div id="cartFullWindow" class="cart-full-window">
+        <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+            <h2 class="text-xl font-bold text-gray-800">Shopping Bag</h2>
+            <button onclick="toggleCart(false)" class="text-gray-500 text-3xl">&times;</button>
+        </div>
+        
+        <div id="checkout-form" class="hidden p-6 bg-gray-50 pb-20">
+            <div id="step-details" class="max-w-md mx-auto space-y-6">
+                <div id="cart-items" class="space-y-4"></div>
+                <div class="space-y-4">
+                    <input type="text" id="cName" placeholder="Full Name" class="w-full border p-4 rounded-2xl outline-none text-sm bg-white">
+                    <input type="text" id="cAddr" placeholder="Address with Pincode" class="w-full border p-4 rounded-2xl outline-none text-sm bg-white">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="tel" id="cPhone" placeholder="Mobile No" class="w-full border p-4 rounded-2xl outline-none text-sm bg-white">
+                        <select id="cSize" class="w-full border p-4 rounded-2xl outline-none text-sm bg-white font-medium">
+                            <option value="">Size</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl space-y-3 border border-gray-100 shadow-sm">
+                    <div class="flex justify-between text-xs"><span>Subtotal</span><span>₹<span id="subTotal">0</span></span></div>
+                    <div class="flex justify-between text-xs text-green-600 font-bold"><span>Discount</span><span>- ₹<span id="discountVal">0</span></span></div>
+                    <div class="flex justify-between text-xs"><span>Shipping</span><span id="shippingDisplay">₹0</span></div>
+                    <div class="flex justify-between text-base font-bold border-t pt-3"><span>Payable Amount</span><span class="text-pink-600">₹<span id="finalTotal">0</span></span></div>
+                </div>
+                <button onclick="showPayment();" class="w-full bg-pink-700 text-white py-4 rounded-2xl font-bold shadow-xl uppercase text-sm">Proceed to Payment</button>
+            </div>
+
+            <div id="step-payment" class="hidden max-w-md mx-auto">
+                <div class="bg-white border-2 border-pink-100 p-6 rounded-3xl text-center mb-6 shadow-md">
+                    <p class="text-red-600 font-bold text-xs mb-4 uppercase tracking-wider">⚠️ Cash on Delivery Not Available</p>
+                    <p class="text-3xl font-bold text-gray-800 mb-4">₹<span id="dispAmt"></span></p>
+                    <img id="qrImg" src="" class="mx-auto w-52 h-52 border p-2 bg-white rounded-xl shadow-sm">
+                    <p class="text-pink-700 font-bold text-[13px] mt-4">Take a screenshot and make a payment</p>
+                    
+                    <div class="secure-badge mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        100% SECURE & ENCRYPTED PAYMENT
+                    </div>
+                </div>
+                
+                <div class="bg-white p-5 rounded-2xl border mb-6 text-center shadow-sm">
+                    <label class="block text-[10px] font-bold text-gray-400 mb-2 uppercase">Upload Payment Screenshot *</label>
+                    <input type="file" id="ssInput" accept="image/*" class="w-full text-xs text-gray-500">
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="goBack()" class="w-1/3 bg-gray-200 py-4 rounded-2xl font-bold text-sm">BACK</button>
+                    <button id="finalBtn" onclick="sendOrder()" class="w-2/3 bg-pink-700 text-white py-4 rounded-2xl font-bold text-sm">CONFIRM ORDER</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG
+        const BOT_TOKEN = "7913244597:AAH5yvc0GulfYNF7TXRyg-K4UZoJT-pqUEE";
+        const CHAT_ID = "1747570398";
+        const UPI_ID = "Paytm.s20g9ra@pty"; 
+
+        const products = [
+            { id: 1, name: "Premium Winter Suit 01", price: 650, mrp: 1599, img: "https://i.ibb.co/FqYv1PvL/IMG-20251227-WA0018.jpg" },
+            { id: 2, name: "Premium Winter Suit 02", price: 650, mrp: 1599, img: "https://i.ibb.co/qM4tJPPs/IMG-20251227-WA0023.jpg" },
+            { id: 3, name: "Premium Winter Suit 03", price: 650, mrp: 1599, img: "https://i.ibb.co/93WhbBys/IMG-20251227-WA0026-1.jpg" },
+            { id: 4, name: "Premium Winter Suit 04", price: 650, mrp: 1599, img: "https://i.ibb.co/wNtG3fYD/IMG-20251227-WA0016.jpg" },
+            { id: 5, name: "Premium Winter Suit 05", price: 650, mrp: 1599, img: "https://i.ibb.co/84tj8gvV/IMG-20251227-WA0012.jpg" },
+            { id: 6, name: "Premium Winter Suit 06", price: 650, mrp: 1599, img: "https://i.ibb.co/N666ygBX/IMG-20251227-WA0050.jpg" },
+            { id: 7, name: "Premium Winter Suit 07", price: 650, mrp: 1599, img: "https://i.ibb.co/6J40FHN6/IMG-20251227-WA0039.jpg" },
+            { id: 8, name: "Premium Winter Suit 08", price: 650, mrp: 1599, img: "https://i.ibb.co/QjJpLdn5/IMG-20251227-WA0051.jpg" },
+            { id: 9, name: "Premium Winter Suit 09", price: 650, mrp: 1599, img: "https://i.ibb.co/cX2wWSzT/IMG-20251227-WA0043.jpg" },
+            { id: 10, name: "Premium Winter Suit 10", price: 650, mrp: 1599, img: "https://i.ibb.co/b5Ck5LxV/IMG-20251227-WA0017.jpg" },
+            { id: 11, name: "Premium Winter Suit 11", price: 650, mrp: 1599, img: "https://i.ibb.co/S4QrCBWH/IMG-20251227-WA0042.jpg" },
+            { id: 12, name: "Premium Winter Suit 12", price: 650, mrp: 1599, img: "https://i.ibb.co/QvXMwbBf/IMG-20251227-WA0040.jpg" },
+            { id: 13, name: "Premium Winter Suit 13", price: 650, mrp: 1599, img: "https://i.ibb.co/zTgY8RnD/IMG-20251227-WA0034.jpg" },
+            { id: 14, name: "Premium Winter Suit 14", price: 650, mrp: 1599, img: "https://i.ibb.co/jPpBZCmN/IMG-20251227-WA0041.jpg" },
+            { id: 15, name: "Premium Winter Suit 15", price: 650, mrp: 1599, img: "https://i.ibb.co/jvjmLmGv/IMG-20251227-WA0020.jpg" },
+            { id: 16, name: "Premium Winter Suit 16", price: 650, mrp: 1599, img: "https://i.ibb.co/1YQpL1KM/IMG-20251227-WA0045.jpg" },
+            { id: 17, name: "Premium Winter Suit 17", price: 650, mrp: 1599, img: "https://i.ibb.co/5Wt1gFXp/IMG-20251227-WA0006.jpg" },
+            { id: 18, name: "Premium Winter Suit 18", price: 650, mrp: 1599, img: "https://i.ibb.co/TMdhb1k9/IMG-20251227-WA0030.jpg" },
+            { id: 19, name: "Premium Winter Suit 19", price: 650, mrp: 1599, img: "https://i.ibb.co/Q3NQmLn6/IMG-20251227-WA0019.jpg" },
+            { id: 20, name: "Premium Winter Suit 20", price: 650, mrp: 1599, img: "https://i.ibb.co/Jjrw2Zv4/IMG-20251227-WA0009.jpg" },
+            { id: 21, name: "Premium Winter Suit 21", price: 650, mrp: 1599, img: "https://i.ibb.co/gZ23pDZm/IMG-20251227-WA0003.jpg" },
+            { id: 22, name: "Premium Winter Suit 22", price: 650, mrp: 1599, img: "https://i.ibb.co/b52TKRsv/IMG-20251227-WA0044.jpg" },
+            { id: 23, name: "Premium Winter Suit 23", price: 650, mrp: 1599, img: "https://i.ibb.co/0jLL339t/IMG-20251227-WA0008.jpg" },
+            { id: 24, name: "Premium Winter Suit 24", price: 650, mrp: 1599, img: "https://i.ibb.co/PBKp8zR/IMG-20251227-WA0037.jpg" },
+            { id: 25, name: "Premium Winter Suit 25", price: 650, mrp: 1599, img: "https://i.ibb.co/yn3wVvP6/IMG-20251227-WA0025.jpg" },
+            { id: 26, name: "Premium Winter Suit 26", price: 650, mrp: 1599, img: "https://i.ibb.co/NghxtH2n/IMG-20251227-WA0010.jpg" },
+            { id: 27, name: "Premium Winter Suit 27", price: 650, mrp: 1599, img: "https://i.ibb.co/RpDbhpzF/IMG-20251227-WA0029.jpg" },
+            { id: 28, name: "Premium Winter Suit 28", price: 650, mrp: 1599, img: "https://i.ibb.co/tpbSz48f/IMG-20251227-WA0049.jpg" },
+            { id: 29, name: "Premium Winter Suit 29", price: 650, mrp: 1599, img: "https://i.ibb.co/9HSRBNDS/IMG-20251227-WA0033.jpg" },
+            { id: 30, name: "Premium Winter Suit 30", price: 650, mrp: 1599, img: "https://i.ibb.co/r2cvxg6v/IMG-20251227-WA0028.jpg" },
+            { id: 31, name: "Premium Winter Suit 31", price: 650, mrp: 1599, img: "https://i.ibb.co/8ggDMXDT/IMG-20251227-WA0015.jpg" },
+            { id: 32, name: "Premium Winter Suit 32", price: 650, mrp: 1599, img: "https://i.ibb.co/VWD6dFvQ/IMG-20251227-WA0035.jpg" },
+            { id: 33, name: "Premium Winter Suit 33", price: 650, mrp: 1599, img: "https://i.ibb.co/d0nyHCSL/IMG-20251227-WA0004.jpg" },
+            { id: 34, name: "Premium Winter Suit 34", price: 650, mrp: 1599, img: "https://i.ibb.co/fdgjM6Fz/IMG-20251227-WA0027.jpg" },
+            { id: 35, name: "Premium Winter Suit 35", price: 650, mrp: 1599, img: "https://i.ibb.co/ymd4Lbbx/IMG-20251227-WA0011.jpg" },
+            { id: 36, name: "Premium Winter Suit 36", price: 650, mrp: 1599, img: "https://i.ibb.co/gLp2zwfQ/IMG-20251227-WA0014.jpg" },
+            { id: 37, name: "Premium Winter Suit 37", price: 650, mrp: 1599, img: "https://i.ibb.co/F4JVxjGV/IMG-20251227-WA0022.jpg" },
+            { id: 38, name: "Premium Winter Suit 38", price: 650, mrp: 1599, img: "https://i.ibb.co/N2sVQ7bh/IMG-20251227-WA0007.jpg" },
+            { id: 39, name: "Premium Winter Suit 39", price: 650, mrp: 1599, img: "https://i.ibb.co/HQFM54F/IMG-20251227-WA0005.jpg" },
+            { id: 40, name: "Premium Winter Suit 40", price: 650, mrp: 1599, img: "https://i.ibb.co/C3jskdmB/IMG-20251227-WA0046.jpg" },
+            { id: 41, name: "Premium Winter Suit 41", price: 650, mrp: 1599, img: "https://i.ibb.co/mCX7kWy2/IMG-20251227-WA0031.jpg" },
+            { id: 42, name: "Premium Winter Suit 42", price: 650, mrp: 1599, img: "https://i.ibb.co/20dVv4Lt/IMG-20251227-WA0048.jpg" },
+            { id: 43, name: "Premium Winter Suit 43", price: 650, mrp: 1599, img: "https://i.ibb.co/DPxdJBrM/IMG-20251227-WA0036.jpg" },
+            { id: 44, name: "Premium Winter Suit 44", price: 650, mrp: 1599, img: "https://i.ibb.co/Y4xMGQm3/IMG-20251227-WA0032.jpg" },
+            { id: 45, name: "Premium Winter Suit 45", price: 650, mrp: 1599, img: "https://i.ibb.co/mV8MpGST/IMG-20251227-WA0038.jpg" },
+            { id: 46, name: "Premium Winter Suit 46", price: 650, mrp: 1599, img: "https://i.ibb.co/RnBympB/IMG-20251227-WA0013.jpg" },
+            { id: 47, name: "Premium Winter Suit 47", price: 650, mrp: 1599, img: "https://i.ibb.co/fVg13p1p/IMG-20251227-WA0024.jpg" },
+            { id: 48, name: "Premium Winter Suit 48", price: 650, mrp: 1599, img: "https://i.ibb.co/VYnpgTVr/IMG-20251227-WA0047.jpg" },
+            { id: 49, name: "Premium Winter Suit 49", price: 650, mrp: 1599, img: "https://i.ibb.co/ymh7q17M/IMG-20251227-WA0021.jpg" },
+            { id: 50, name: "Premium Winter Suit 50", price: 650, mrp: 1599, img: "https://i.ibb.co/93WhbBys/IMG-20251227-WA0026-1.jpg" }
+        ];
+
+        let cart = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function loadProducts(page = 1) {
+            currentPage = page;
+            const grid = document.getElementById('product-grid');
+            const startIndex = (page - 1) * itemsPerPage;
+            const paged = products.slice(startIndex, startIndex + itemsPerPage);
+            
+            grid.innerHTML = paged.map((p, i) => {
+                const actualIndex = startIndex + i;
+                let badge = '';
+                
+                // Photo 3-8 (index 2-7) Best Seller, Others Sale
+                if(actualIndex >= 2 && actualIndex <= 7) {
+                    badge = `<div class="badge-best">BEST SELLER</div>`;
+                } else {
+                    badge = `<div class="badge-sale">SALE -70%</div>`;
+                }
+
+                return `
+                <div class="bg-white rounded-[1.8rem] overflow-hidden shadow-sm border border-pink-50">
+                    <div class="product-img-container">
+                        ${badge}
+                        <img src="${p.img}" onclick="viewImage('${p.img}')" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-3 text-center">
+                        <h3 class="font-bold text-gray-800 truncate text-[11px] mb-1">${p.name}</h3>
+                        <div class="flex items-center justify-center gap-2 mb-3">
+                            <span class="text-pink-700 font-bold text-sm">₹${p.price}</span>
+                            <span class="text-gray-300 line-through text-[10px]">₹${p.mrp}</span>
+                        </div>
+                        <button onclick="addToCart(${p.id})" class="w-full bg-gray-900 text-white py-2 rounded-xl text-[10px] font-bold uppercase">Add</button>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            renderPagination();
+            window.scrollTo(0,0);
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(products.length / itemsPerPage);
+            const div = document.getElementById('pagination');
+            let html = '';
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button onclick="loadProducts(${i})" class="px-4 py-2 rounded-xl border font-bold text-sm ${currentPage === i ? 'bg-pink-700 text-white' : 'bg-white'}">${i}</button>`;
+            }
+            div.innerHTML = html;
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const exists = cart.find(i => i.id === id);
+            if(exists) exists.qty++; else cart.push({...product, qty: 1});
+            updateCounter();
+            openPopup("Success", "Added to bag!", "🛍️");
+        }
+
+        function updateCounter() { document.getElementById('cart-count').innerText = cart.reduce((s, i) => s + i.qty, 0); }
+        function toggleCart(open) { 
+            const cw = document.getElementById('cartFullWindow'); 
+            if(open) { cw.classList.add('cart-active'); renderCart(); } 
+            else { cw.classList.remove('cart-active'); } 
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-items');
+            const form = document.getElementById('checkout-form');
+            if(cart.length === 0) { list.innerHTML = "<div class='text-center py-20 text-gray-400 italic'>Bag is empty</div>"; form.classList.add('hidden'); return; }
+            form.classList.remove('hidden');
+            
+            let totalQty = cart.reduce((s, i) => s + i.qty, 0);
+            let dynamicPrice = (totalQty > 1) ? 500 : 650;
+            let subtotal = totalQty * dynamicPrice;
+            let discount = (totalQty >= 3) ? Math.round(subtotal * 0.10) : 0;
+            let shipping = (totalQty === 1) ? 299 : 0;
+            let final = (subtotal - discount) + shipping;
+
+            document.getElementById('subTotal').innerText = subtotal;
+            document.getElementById('discountVal').innerText = discount;
+            document.getElementById('shippingDisplay').innerText = shipping === 0 ? "FREE" : "₹" + shipping;
+            document.getElementById('finalTotal').innerText = final;
+            document.getElementById('dispAmt').innerText = final;
+
+            list.innerHTML = cart.map((item, i) => `
+                <div class="flex gap-4 bg-white p-3 rounded-2xl border items-center shadow-sm">
+                    <img src="${item.img}" class="w-14 h-14 object-cover rounded-xl">
+                    <div class="flex-1">
+                        <p class="font-bold text-xs text-gray-800">${item.name}</p>
+                        <p class="text-pink-600 font-bold text-xs">₹${dynamicPrice}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="updateQty(${i}, -1)" class="w-8 h-8 bg-gray-100 rounded-full font-bold">-</button>
+                        <span class="text-sm font-bold">${item.qty}</span>
+                        <button onclick="updateQty(${i}, 1)" class="w-8 h-8 bg-gray-100 rounded-full font-bold">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateQty(index, change) {
+            cart[index].qty += change;
+            if(cart[index].qty < 1) cart.splice(index, 1);
+            updateCounter(); renderCart();
+        }
+
+        function showPayment() {
+            const n = document.getElementById('cName').value.trim();
+            const a = document.getElementById('cAddr').value.trim();
+            const p = document.getElementById('cPhone').value.trim();
+            const s = document.getElementById('cSize').value;
+            if(!n || !a || !p || !s) { openPopup("Wait", "Fill all details.", "⚠️"); return; }
+            document.getElementById('step-details').classList.add('hidden');
+            document.getElementById('step-payment').classList.remove('hidden');
+            const total = document.getElementById('finalTotal').innerText;
+            const upiUrl = `upi://pay?pa=${UPI_ID}&pn=PPCollection&cu=INR&am=${total}`;
+            document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
+        }
+
+        function goBack() { document.getElementById('step-payment').classList.add('hidden'); document.getElementById('step-details').classList.remove('hidden'); }
+
+        async function sendOrder() {
+            const ssFile = document.getElementById('ssInput').files[0];
+            if(!ssFile) { openPopup("Alert", "Upload screenshot.", "📸"); return; }
+            const btn = document.getElementById('finalBtn');
+            btn.innerHTML = `<span class="loader"></span> SENDING...`;
+            btn.disabled = true;
+
+            const trackId = "PPW-" + Math.floor(100000 + Math.random() * 900000);
+            const caption = `👗 *NEW ORDER*\n\n🆔 *Track:* \`${trackId}\`\n👤 *Name:* ${document.getElementById('cName').value}\n📞 *Phone:* ${document.getElementById('cPhone').value}\n📏 *Size:* ${document.getElementById('cSize').value}\n💰 *Pay:* ₹${document.getElementById('finalTotal').innerText}\n📍 *Addr:* ${document.getElementById('cAddr').value}\n📦 *Items:* ${cart.map(i => i.name + ' (x'+i.qty+')').join(', ')}`;
+
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', ssFile);
+            formData.append('caption', caption);
+            formData.append('parse_mode', 'Markdown');
+
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+                if(res.ok) {
+                    document.getElementById('resTrackId').innerText = trackId;
+                    document.getElementById('successScreen').style.display = "block";
+                    cart = []; updateCounter();
+                } else { throw new Error(); }
+            } catch (err) { 
+                openPopup("Error", "Check Bot status.", "❌"); 
+                btn.innerHTML = "CONFIRM ORDER"; btn.disabled = false;
+            }
+        }
+
+        function openPopup(title, msg, icon) {
+            document.getElementById('popupTitle').innerText = title;
+            document.getElementById('popupMsg').innerText = msg;
+            document.getElementById('popupIcon').innerText = icon;
+            document.getElementById('customPopup').style.display = "flex";
+        }
+        function closePopup() { document.getElementById('customPopup').style.display = "none"; }
+        function viewImage(src) { document.getElementById('modalImg').src = src; document.getElementById('imgModal').style.display = "flex"; }
+        function closeImage() { document.getElementById('imgModal').style.display = "none"; }
+
+        setInterval(() => {
+            let active = document.querySelector('.banner-text.active');
+            let next = active.nextElementSibling || document.getElementById('banner1');
+            active.classList.remove('active');
+            next.classList.add('active');
+        }, 3500);
+
+        loadProducts(1);
+    </script>
+</body>
+</html>
